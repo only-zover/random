@@ -8,6 +8,7 @@ typedef struct{
 	int mes;
 	int ano;
 } DATA;
+
 typedef struct{
 	int  numero;
 	DATA diaInicio;
@@ -19,54 +20,43 @@ typedef struct {
     int topo;
 } PILHA;
 
-/* Altere as funções */
-
 void inicializa(PILHA *p);
 int  cheia(PILHA p);
 int  vazia(PILHA p);
 void imprime(PILHA p);
-void push(PILHA *p, int valor);
-int  pop(PILHA *p);
-
-/*Crie funções */
-/*
+void push(PILHA *p, TAREFA tarefa);
+TAREFA pop(PILHA *p);
 void setData(DATA *d, int dia, int mes, int ano);
--- define os valores de uma variável tipo data com os
-   valores de dia, mes e ano
-   
 void setTarefa(TAREFA *t, int numero, DATA i, DATA f);
--- define os valores da tarefa.
-
 void troca(PILHA *saida, PILHA *entrada);
--- desempilha uma tarefa da pilha de saída e empilha na pilha de entrada.
-*/
 
 int main(){
-    // PILHA p1, p2, p3;
-    // int temp;
-    printf("Hello World!\n");
-    // inicializa(&p1);
-    // inicializa(&p2);
-    // inicializa(&p3);
+    PILHA p1, p2, p3;
+    TAREFA t1, t2, t3, t4;
+    DATA d1, d2, d3;
 
-    // push(&p1,10);
-    // push(&p1,20);
-    // push(&p1,30);
+    inicializa(&p1);
+    inicializa(&p2);
+    setData(&d1, 1, 1, 1010);
+    setData(&d2, 2, 2, 2020);
+    setData(&d3, 3, 3, 3030);
+    setTarefa(&t1, 1, d1, d2);
+    setTarefa(&t2, 2, d2, d3);
+    setTarefa(&t3, 3, d3, d1);
+    setTarefa(&t4, 4, d1, d2);
 
-    // push(&p2,100);
-    // push(&p2,200);
-    // push(&p2,300);
+    push(&p1, t1);
+    push(&p1, t2);
+    push(&p2, t3);
+    push(&p2, t4);
 
-    //temp = pop(&p1);
-    //push(&p2,temp);
+    imprime(p1);
+    imprime(p2);
 
-    // push(&p2,pop(&p1));
-
-    // while(!vazia(p1)) push(&p3,pop(&p1));
-    // while(!vazia(p2)) push(&p3,pop(&p2));
-
+    troca(&p2, &p1);
+    imprime(p1);
+    imprime(p2);
 }
-
 
 void inicializa(PILHA *p){
     p->topo = -1;
@@ -80,24 +70,49 @@ int  vazia(PILHA p){
     return(p.topo == -1);
 }
 
-void imprime(PILHA p){ //IMPLEMENTAR.
-
+void imprime(PILHA p){
+    printf("Conteúdo da Pilha:\n");
+    for (int i = 0; i <= p.topo; i++) {
+        printf("Tarefa %d:\n", i + 1);
+        printf("Número: %d\n", p.pilha[i].numero);
+        printf("Data de Início: %d/%d/%d\n", p.pilha[i].diaInicio.dia, p.pilha[i].diaInicio.mes, p.pilha[i].diaInicio.ano);
+        printf("Data de Fim: %d/%d/%d\n", p.pilha[i].diaFim.dia, p.pilha[i].diaFim.mes, p.pilha[i].diaFim.ano);
+        printf("\n");
+    }
 }
 
-// void push(PILHA *p, int valor){
-//     if(!cheia(*p)){
-//         p->topo++;
-//         p->pilha[p->topo] = valor;
-//     }
+void push(PILHA *p, TAREFA tarefa){
+    if(!cheia(*p)){
+        p->topo++;
+        p->pilha[p->topo] = tarefa;
+    }
+}
 
-// }
-// int  pop(PILHA *p){
-//     int temp;
-//     if(!vazia(*p)){
-//         temp = p->pilha[p->topo];
-//         p->topo--;
-//         return temp;
-//     }else{
-//         return -1;
-//     }
-// }
+TAREFA pop(PILHA *p){
+    TAREFA tarefa_temp;
+    if(!vazia(*p)){
+        tarefa_temp = p->pilha[p->topo];
+        p->topo--;
+        return tarefa_temp;
+    }
+}
+
+void setData(DATA *d, int dia, int mes, int ano) {
+    d->dia = dia;
+    d->mes = mes;
+    d->ano = ano;
+}
+
+void setTarefa(TAREFA *t, int numero, DATA i, DATA f) {
+    t->numero = numero;
+    t->diaInicio = i;
+    t->diaFim = f;
+}
+
+void troca(PILHA *saida, PILHA *entrada) {
+    TAREFA tarefa_temp;
+    if (!vazia(*saida)) {
+        tarefa_temp = pop(saida);
+        push(entrada, tarefa_temp);
+    }
+}
