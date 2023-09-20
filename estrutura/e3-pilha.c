@@ -54,6 +54,7 @@ int main(){
     imprime(p2);
 
     troca(&p2, &p1);
+    
     imprime(p1);
     imprime(p2);
 }
@@ -62,11 +63,11 @@ void inicializa(PILHA *p){
     p->topo = -1;
 }
 
-int  cheia(PILHA p){
+int cheia(PILHA p){
     return(p.topo == (N-1));
 }
 
-int  vazia(PILHA p){
+int vazia(PILHA p){
     return(p.topo == -1);
 }
 
