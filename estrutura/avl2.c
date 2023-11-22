@@ -1,80 +1,108 @@
 #include <stdio.h> 
 #include <stdlib.h>
 
-typedef struct Node {
+typedef struct Cliente {
     int senha;
     int idade;
-    struct Node *next;
-} Node;
+    struct Cliente *prox;
+} Cliente;
 
 typedef struct {
-    Node *front;
-    Node *rear;
-} Queue;
- 
-void initializeQueue (Queue *q) {
-    q->front = q->rear = NULL;
-} 
+    Cliente *frente;
+    Cliente *atras;
+} Fila;
 
-int isEmpty (Queue *q) {
-    return q->front == NULL;
+void initializeQueue (Fila *f) {
+    f->frente = f->atras = NULL;
 }
- 
-void enqueue (Queue *q, int senha, int idade) {
-    Node *newNode = (Node*) malloc (sizeof (Node));
-    newNode->senha = senha;
-    newNode->idade = idade;
-    newNode->next = NULL;
+
+int estaVazio (Fila *f) {
+    return f->frente == NULL;
+}
+
+void enfileirar (Fila *f, int senha, int idade) {
+    Cliente *novoCliente = (Cliente*) malloc (sizeof (Cliente));
+    novoCliente->senha = senha;
+    novoCliente->idade = idade;
+    novoCliente->prox = NULL;
   
-    if (isEmpty (q)) {
-        q->front = q->rear = newNode;
+    if (estaVazio (f)) {
+        f->frente = f->atras = novoCliente;
     } else {
-        q->rear->next = newNode;
-        q->rear = newNode;
+        f->atras->prox = novoCliente;
+        f->atras = novoCliente;
     }
 }
 
-void dequeue (Queue *q) {
-    if (!isEmpty (q)) {
-        Node *temp = q->front;
-        q->front = q->front->next;
-        free(temp);
+Cliente* desenfileirar (Fila *f) {
+    Cliente *temp = NULL;
+    if (!estaVazio(f)) {
+        temp = f->frente;
+        f->frente = f->frente->prox;
+        temp->prox = NULL; // Isso é importante para evitar que a fila inteira seja liberada quando chamamos free(temp) mais tarde
     }
+    return temp;
 }
 
-void printQueue (Queue *prioA, char fila) {
-    // printf ("Fila %c: ", fila);
-    // Node *current = q->front;
-    // while (current != NULL) {
-    //     printf ("[%d,%d]", current->senha, current->idade);
-    //     current = current->next;
-    //     if (current != NULL) {
-	   //     printf ("->");
-	   // }
-    // }
-    // printf ("...");
+void imprimirFila (Fila *prioA, Fila *prioB, Fila *prioC) {
     printf("Prioritários-A: ");
-    Node *current = prioA->front;
-    while (current != NULL) {
-        printf ("[%d,%d]", current->senha, current->idade);
-        current = current->next;
-        if (current != NULL) {
+    if (estaVazio(prioA)) {
+        printf("Vazia");
+    }
+    Cliente *cliente = prioA->frente;
+    while (cliente != NULL) {
+        printf ("[%d,%d]", cliente->senha, cliente->idade);
+        cliente = cliente->prox;
+        if (cliente != NULL) {
 	        printf ("->");
         }
     }
-    printf("Não-prioritários-A:");
-    
-    while (current != NULL) {
-        printf ("[%d,%d]", current->senha, current->idade);
-        current = current->next;
-        if (current != NULL) {
+
+    printf("\nNão-prioritários-A: ");
+    if (estaVazio(prioB)) {
+        printf("Vazia");
+    }
+    cliente = prioB->frente;
+    while (cliente != NULL) {
+        printf ("[%d,%d]", cliente->senha, cliente->idade);
+        cliente = cliente->prox;
+        if (cliente != NULL) {
+	        printf("->");
+        }
+    }
+
+    printf("\nNão agendados-B:");
+    if (estaVazio(prioC)) {
+        printf(" Vazia\n");
+    }
+    cliente = prioC->frente;
+    while (cliente != NULL) {
+        printf ("[%d,%d]", cliente->senha, cliente->idade);
+        cliente = cliente->prox;
+        if (cliente != NULL) {
 	        printf ("->");
         }
+    }
+    printf("\n");
+}
+
+void removerImprimir(Fila* queue, char* queueName, int limit) {
+    int cont = 0;
+    while (!estaVazio(queue) && cont < limit) {
+        Cliente* cliente = desenfileirar(queue);
+        if (cliente != NULL) {
+            printf("%s,%d,%d\n", queueName, cliente->senha, cliente->idade);
+            free(cliente);
+            cont++;
+        }
+    }
+    if (estaVazio(queue)) {
+        printf("Vazia.\n");
     }
 }
 
 int main () {
-    Queue prioA, naoPrioA, naoAgend; 
+    Fila prioA, naoPrioA, naoAgend; 
     initializeQueue(&prioA);
     initializeQueue(&naoPrioA);
     initializeQueue(&naoAgend);
@@ -82,43 +110,35 @@ int main () {
     int senha, idade;
     char categoria;
     while (1) {
-        scanf ("%c", &acao);
-        if (acao == 'f') {
-	        break;
-	    }
-        scanf ("%d %d %c", &senha, &idade, &categoria);
+        scanf ("%c %d %d %c", &acao, &senha, &idade, &categoria);
         switch (acao) {
+            case 'f':
+            break;
 	        case 'i': 
 	            switch (categoria) {
 	                case 'A':
 	                    if (idade >= 60) {
-	                        enqueue(&prioA, senha, idade);    
+	                        enfileirar(&prioA, senha, idade);    
 	                    } else {
-	                        enqueue(&naoPrioA, senha, idade);
+	                        enfileirar(&naoPrioA, senha, idade);
 	                    }
 	                break;
 	                case 'B':
-	                    enqueue(&naoAgend, senha, idade);
+	                    enfileirar(&naoAgend, senha, idade);
 	                break;
 	            }
 	        break;
 	        case 'r':
-	            //
-	            
+                removerImprimir(&prioA, "Prioritários-A: ", 4);
+                removerImprimir(&naoPrioA, "Não-prioritários-A: ", 4);
+                removerImprimir(&naoAgend, "Não agendados-B: ", 2);
+                if (estaVazio(&prioA) && estaVazio(&naoPrioA) && estaVazio(&naoAgend)) {
+                    removerImprimir(&prioA, "prioritários-A: ", 4);
+                }
 	        break;
 	        case 'p':
-	            switch (fila) {
-	                case 'A':
-	                    printQueue(&filaA, 'A');
-	                break;
-	                case 'B':
-	                    printQueue(&filaB, 'B');
-	                break;
-	                case 'C':
-	                    printQueue(&filaC, 'C');
-	                break;
-	           }
-	       break;
+	            imprimirFila(&prioA, &naoPrioA, &naoAgend);
+	        break;
         }
     }
 return 0;
